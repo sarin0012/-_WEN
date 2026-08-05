@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-In & Tracker Application</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Load Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        
+        .tab-inactive {
+            color: #6b7280;
+        }
+        
+        .tab-inactive:hover {
+            color: #374151;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        /* Custom Scrollbar for lists */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Toast Animation */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+            <i class="fa-solid fa-clipboard-check text-2xl"></i>
+            <div>
+                <h1 class="text-xl font-bold leading-tight">Smart Check-In</h1>
+                <p class="text-indigo-200 text-xs">Training & Task Completion Tracker</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
+        
+        <!-- Navigation Tabs -->
+        <nav class="flex border-b border-gray-200 bg-white rounded-t-lg shadow-sm px-2 pt-2">
+            <button id="tab-btn-checkin" onclick="switchTab('checkin')" class="px-6 py-3 text-sm transition-colors tab-active">
+                <i class="fa-solid fa-user-check mr-2"></i> User Check-In
+            </button>
+            <button id="tab-btn-admin" onclick="switchTab('admin')" class="px-6 py-3 text-sm transition-colors tab-inactive">
+                <i class="fa-solid fa-gear mr-2"></i> Admin & Report
+            </button>
+        </nav>
+
+        <!-- VIEW: USER CHECK-IN -->
+        <section id="view-checkin" class="bg-white rounded-b-lg rounded-tr-lg shadow-sm p-6 md:p-8 animate-[slideInRight_0.2s_ease-out]">
+            <div class="max-w-lg mx-auto">
+                <!-- Topic Display -->
+                <div class="text-center mb-8 bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+                    <h2 id="display-topic" class="text-2xl font-bold text-indigo-900 mb-2">Loading Topic...</h2>
+                    <div class="flex items-center justify-center gap-4 text-sm text-indigo-700">
+                        <span id="display-date-start" title="Start Date"><i class="fa-regular fa-calendar mr-1"></i> -</span>
+                        <span class="text-indigo-300"><i class="fa-solid fa-arrow-right"></i></span>
+                        <span id="display-date-end" title="End Date"><i class="fa-regular fa-calendar-check mr-1"></i> -</span>
+                    </div>
+                </div>
+
+                <!-- Check-in Form -->
+                <form id="checkin-form" onsubmit="handleCheckIn(event)" class="space-y-6">
+                    <div>
+                        <label for="emp-select" class="block text-sm font-medium text-gray-700 mb-2">Select Your Name</label>
+                        <div class="relative">
+                            <select id="emp-select" required class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border shadow-sm appearance-none bg-white">
+                                <option value="" disabled selected>-- Select your name --</option>
+                                <!-- Employee options will be loaded here -->
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                <i class="fa-solid fa-chevron-down text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        <i class="fa-solid fa-check-circle mr-2"></i> ทำแล้ว
+                    </button>
+                </form>
+
+                <!-- Status List Display in User View -->
+                <div class="mt-8 border-t border-gray-200 pt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i> รายชื่อพนักงานและสถานะการทำ
+                        </h3>
+                        <span id="user-status-count" class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">
+                            0/0 ทำแล้ว
+                        </span>
+                    </div>
+                    <div id="user-status-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto custom-scrollbar p-1">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: ADMIN PANEL -->
+        <section id="view-admin" class="hidden bg-white rounded-b-lg rounded-tl-lg shadow-sm p-6 md:p-8">
+            
+            <!-- ADMIN LOGIN VIEW -->
+            <div id="admin-login-view" class="max-w-sm mx-auto py-12 flex flex-col items-center animate-[slideInRight_0.2s_ease-out]">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Admin Access</h3>
+                <p class="text-sm text-gray-500 mb-6 text-center">Please enter the administrator password (default: 1234) to manage settings.</p>
+                <form onsubmit="handleAdminLogin(event)" class="w-full space-y-4">
+                    <input type="password" id="admin-password-input" placeholder="Enter Password" required class="w-full p-3 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 text-center tracking-widest text-lg">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-medium py-3 rounded shadow hover:bg-indigo-700 transition-colors">
+                        <i class="fa-solid fa-key mr-2"></i> Unlock
+                    </button>
+                </form>
+            </div>
+
+            <!-- ADMIN CONTENT VIEW (Hidden until unlocked) -->
+            <div id="admin-content-view" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column: Settings & Employee Mgmt -->
+                <div class="lg:col-span-1 space-y-6">
+                    
+                    <!-- 1. Topic & Date Settings -->
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2"><i class="fa-solid fa-pen-to-square text-indigo-500 mr-2"></i> Event Settings</h3>
+                        <form id="settings-form" onsubmit="saveSettings(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Topic / Event Name</label>
+                                <input type="text" id="setting-topic" required class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                                    <input type="date" id="setting-start" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                                    <input type="date" id="setting-end" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-gray-800 text-white text-sm py-2 rounded hover:bg-gray-900 transition-colors">
+                                Save Settings
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 2. Employee Management -->
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 flex flex-col h-[400px]">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 flex justify-between items-center">
+                            <span><i class="fa-solid fa-users text-indigo-500 mr-2"></i> Employees</span>
+                            <span id="emp-count-badge" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
+                        </h3>
+                        
+                        <!-- Add Form -->
+                        <form id="add-emp-form" onsubmit="addEmployee(event)" class="mb-4 flex flex-col gap-2">
+                            <input type="text" id="new-emp-name" placeholder="Full Name" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="flex gap-2">
+                                <input type="text" id="new-emp-dept" placeholder="Department" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                                <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Employee List -->
+                        <div id="employee-list" class="flex-grow overflow-y-auto custom-scrollbar bg-white border border-gray-200 rounded divide-y divide-gray-100">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Report & Data -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-0 rounded-lg flex flex-col h-full">
+                        <div class="flex justify-between items-end mb-4 border-b pb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800"><i class="fa-solid fa-chart-bar text-indigo-500 mr-2"></i> Status Report</h3>
+                                <p class="text-sm text-gray-500 mt-1">Real-time overview of completions.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="logoutAdmin()" class="text-xs bg-gray-100 text-gray-600 border border-gray-300 px-3 py-2 rounded hover:bg-gray-200 transition-colors" title="Lock Admin Panel">
+                                    <i class="fa-solid fa-lock"></i>
+                                </button>
+                                <button onclick="clearCheckInData()" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded hover:bg-red-100 transition-colors">
+                                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset Data
+                                </button>
+                                <button onclick="exportToCSV()" class="text-xs bg-green-600 text-white px-3 py-2 rounded shadow-sm hover:bg-green-700 transition-colors">
+                                    <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 text-center">
+                                <div class="text-indigo-500 text-xs font-bold uppercase tracking-wide mb-1">Total</div>
+                                <div id="stat-total" class="text-2xl font-bold text-indigo-900">0</div>
+                            </div>
+                            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100 text-center">
+                                <div class="text-emerald-600 text-xs font-bold uppercase tracking-wide mb-1">Completed</div>
+                                <div id="stat-done" class="text-2xl font-bold text-emerald-900">0</div>
+                            </div>
+                            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 text-center">
+                                <div class="text-amber-600 text-xs font-bold uppercase tracking-wide mb-1">Pending</div>
+                                <div id="stat-pending" class="text-2xl font-bold text-amber-900">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Data Table -->
+                        <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-600">Employee Name</th>
+                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-600">Dept</th>
+                                        <th scope="col" class="px-4 py-3 text-center font-semibold text-gray-600">Status</th>
+                                        <th scope="col" class="px-4 py-3 text-right font-semibold text-gray-600">Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Custom Delete Confirmation Modal (Replaces browser confirm()) -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden animate-[slideInRight_0.2s_ease-out]">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 mx-auto">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Delete Employee</h3>
+                <p id="delete-modal-msg" class="text-sm text-gray-500 text-center mb-6">Are you sure you want to remove this employee?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button id="btn-confirm-delete" class="flex-1 px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Data Confirmation Modal -->
+    <div id="clear-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden animate-[slideInRight_0.2s_ease-out]">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 mx-auto">
+                    <i class="fa-solid fa-rotate-left text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Reset All Check-ins?</h3>
+                <p class="text-sm text-gray-500 text-center mb-6">This will clear all completion records. Employees will remain. This action cannot be undone.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeClearModal()" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                    <button onclick="executeClearData()" class="flex-1 px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors">Yes, Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col gap-2 z-50"></div>
+
+    <script>
+        // --- DATA & STATE MANAGEMENT ---
+        
+        // Default Sample Data
+        const defaultEmployees = [
+            { id: 'emp_1', name: 'Somchai Jaidee', dept: 'IT' },
+            { id: 'emp_2', name: 'Suda Rakngan', dept: 'HR' },
+            { id: 'emp_3', name: 'Nitiwadee Sooksan', dept: 'Marketing' }
+        ];
+
+        // Auth State
+        let isAdminAuthenticated = false;
+        const ADMIN_PASSWORD = "1234";
+
+        // Load from LocalStorage or use defaults
+        let appSettings = JSON.parse(localStorage.getItem('chktrk_settings')) || {
+            topic: 'Cybersecurity Annual Training 2024',
+            startDate: '',
+            endDate: ''
+        };
+        let employees = JSON.parse(localStorage.getItem('chktrk_employees')) || defaultEmployees;
+        let checkIns = JSON.parse(localStorage.getItem('chktrk_data')) || [];
+
+        // Save data back to localStorage
+        function persistData() {
+            localStorage.setItem('chktrk_settings', JSON.stringify(appSettings));
+            localStorage.setItem('chktrk_employees', JSON.stringify(employees));
+            localStorage.setItem('chktrk_data', JSON.stringify(checkIns));
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            // Apply settings to Admin form
+            document.getElementById('setting-topic').value = appSettings.topic;
+            document.getElementById('setting-start').value = appSettings.startDate;
+            document.getElementById('setting-end').value = appSettings.endDate;
+
+            // Render UI
+            updateCheckInHeaders();
+            renderDropdown();
+            renderEmployeeListAdmin();
+            renderReport();
+            renderUserStatusList();
+        };
+
+        // --- TAB SWITCHING LOGIC ---
+        function switchTab(tabId) {
+            const vCheckin = document.getElementById('view-checkin');
+            const vAdmin = document.getElementById('view-admin');
+            const bCheckin = document.getElementById('tab-btn-checkin');
+            const bAdmin = document.getElementById('tab-btn-admin');
+
+            if (tabId === 'checkin') {
+                vCheckin.classList.remove('hidden');
+                vAdmin.classList.add('hidden');
+                bCheckin.className = 'px-6 py-3 text-sm transition-colors tab-active';
+                bAdmin.className = 'px-6 py-3 text-sm transition-colors tab-inactive';
+                // Refresh headers when coming back
+                updateCheckInHeaders();
+                renderDropdown();
+                renderUserStatusList();
+            } else {
+                vCheckin.classList.add('hidden');
+                vAdmin.classList.remove('hidden');
+                bCheckin.className = 'px-6 py-3 text-sm transition-colors tab-inactive';
+                bAdmin.className = 'px-6 py-3 text-sm transition-colors tab-active';
+                
+                // Check Authentication
+                if (isAdminAuthenticated) {
+                    document.getElementById('admin-login-view').classList.add('hidden');
+                    document.getElementById('admin-content-view').classList.remove('hidden');
+                    renderEmployeeListAdmin();
+                    renderReport();
+                } else {
+                    document.getElementById('admin-login-view').classList.remove('hidden');
+                    document.getElementById('admin-content-view').classList.add('hidden');
+                    document.getElementById('admin-password-input').value = '';
+                    setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
+                }
+            }
+        }
+
+        // --- ADMIN AUTHENTICATION ---
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('admin-password-input').value;
+            
+            if (input === ADMIN_PASSWORD) {
+                isAdminAuthenticated = true;
+                showToast('Admin Access Granted', 'success');
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-content-view').classList.remove('hidden');
+                // Render admin data after unlock
+                renderEmployeeListAdmin();
+                renderReport();
+            } else {
+                showToast('Incorrect Password', 'error');
+                document.getElementById('admin-password-input').value = '';
+                document.getElementById('admin-password-input').focus();
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            showToast('Locked successfully', 'success');
+            document.getElementById('admin-content-view').classList.add('hidden');
+            document.getElementById('admin-login-view').classList.remove('hidden');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        // --- ADMIN: SETTINGS ---
+        function saveSettings(e) {
+            e.preventDefault();
+            appSettings.topic = document.getElementById('setting-topic').value;
+            appSettings.startDate = document.getElementById('setting-start').value;
+            appSettings.endDate = document.getElementById('setting-end').value;
+            
+            persistData();
+            updateCheckInHeaders();
+            showToast('Settings saved successfully', 'success');
+        }
+
+        // --- ADMIN: EMPLOYEE MANAGEMENT ---
+        function addEmployee(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new-emp-name');
+            const deptInput = document.getElementById('new-emp-dept');
+            
+            const newEmp = {
+                id: 'emp_' + Date.now(),
+                name: nameInput.value.trim(),
+                dept: deptInput.value.trim()
+            };
+
+            if (newEmp.name && newEmp.dept) {
+                employees.push(newEmp);
+                persistData();
+                
+                // Update UI
+                nameInput.value = '';
+                deptInput.value = '';
+                renderEmployeeListAdmin();
+                renderDropdown(); // Update background dropdown
+                renderReport(); // Update table stats
+                
+                showToast('Employee added', 'success');
+            }
+        }
+
+        // Variables for custom delete modal
+        let employeeToDeleteId = null;
+
+        function openDeleteModal(id, name) {
+            employeeToDeleteId = id;
+            document.getElementById('delete-modal-msg').innerHTML = `Are you sure you want to remove <strong>${name}</strong>?`;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            
+            // Attach specific event to confirm button
+            document.getElementById('btn-confirm-delete').onclick = function() {
+                executeDelete();
+            };
+        }
+
+        function closeDeleteModal() {
+            employeeToDeleteId = null;
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+
+        function executeDelete() {
+            if (!employeeToDeleteId) return;
+            
+            // Remove from employee list
+            employees = employees.filter(emp => emp.id !== employeeToDeleteId);
+            // Optionally remove their check-in data to keep things clean
+            checkIns = checkIns.filter(chk => chk.empId !== employeeToDeleteId);
+            
+            persistData();
+            renderEmployeeListAdmin();
+            renderDropdown();
+            renderReport();
+            
+            closeDeleteModal();
+            showToast('Employee deleted', 'success');
+        }
+
+        function renderEmployeeListAdmin() {
+            const list = document.getElementById('employee-list');
+            document.getElementById('emp-count-badge').textContent = employees.length;
+            list.innerHTML = '';
+
+            if (employees.length === 0) {
+                list.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">No employees found.</div>`;
+                return;
+            }
+
+            // Sort alphabetical
+            const sorted = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+
+            sorted.forEach(emp => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 hover:bg-gray-50';
+                div.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium text-gray-800">${emp.name}</span>
+                        <span class="text-xs text-gray-500">${emp.dept}</span>
+                    </div>
+                    <button onclick="openDeleteModal('${emp.id}', '${emp.name}')" class="text-gray-400 hover:text-red-500 p-2 rounded transition-colors" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- USER CHECK-IN ---
+        function updateCheckInHeaders() {
+            document.getElementById('display-topic').textContent = appSettings.topic || 'Untitled Event';
+            
+            const formatDt = (d) => {
+                if(!d) return '-';
+                const dateObj = new Date(d);
+                return isNaN(dateObj) ? d : dateObj.toLocaleDateString('th-TH');
+            };
+
+            document.getElementById('display-date-start').innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${formatDt(appSettings.startDate)}`;
+            document.getElementById('display-date-end').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> ${formatDt(appSettings.endDate)}`;
+        }
+
+        function renderDropdown() {
+            const select = document.getElementById('emp-select');
+            // Keep the first default option
+            select.innerHTML = '<option value="" disabled selected>-- Select your name --</option>';
+            
+            const sorted = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+            sorted.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = `${emp.name} (${emp.dept})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // --- USER CHECK-IN ---
+        async function handleCheckIn(e) {
+            e.preventDefault();
+            const empId = document.getElementById('emp-select').value;
+            
+            if (!empId) {
+                showToast('Please select your name first.', 'error');
+                return;
+            }
+
+            // Check if already done
+            const existing = checkIns.find(c => c.empId === empId);
+            if (existing) {
+                showToast('You have already marked this as done!', 'error');
+                return;
+            }
+
+            const empData = employees.find(emp => emp.id === empId);
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSbGnPIQOTuLhHfGFHkPsggkr08ARxQke_39rM5UPK2EfcpXEwvLUcHXGASathZ0Mk/exec';
+
+            showToast('Saving to Google Sheet...', 'success');
+
+            try {
+                // Send data to Google Apps Script
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        empId: empData ? empData.id : empId,
+                        name: empData ? empData.name : '',
+                        dept: empData ? empData.dept : '',
+                        topic: appSettings.topic || ''
+                    })
+                });
+
+                // Record check-in locally
+                checkIns.push({
+                    empId: empId,
+                    timestamp: new Date().toISOString()
+                });
+
+                persistData();
+                renderReport();
+                renderUserStatusList();
+                document.getElementById('emp-select').value = ''; // Reset select
+                showToast('Checked in & Saved to Google Sheet!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error saving to Google Sheet', 'error');
+            }
+        }
+
+        // --- USER STATUS LIST DISPLAY ---
+        function renderUserStatusList() {
+            const listContainer = document.getElementById('user-status-list');
+            const countBadge = document.getElementById('user-status-count');
+            if (!listContainer) return;
+
+            listContainer.innerHTML = '';
+            let doneCount = 0;
+
+            const sorted = [...employees].sort((a, b) => a.name.localeCompare(b.name));
+
+            if (sorted.length === 0) {
+                listContainer.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-4">ไม่มีข้อมูลพนักงาน</div>';
+                if (countBadge) countBadge.textContent = '0/0 ทำแล้ว';
+                return;
+            }
+
+            sorted.forEach(emp => {
+                const isDone = checkIns.some(c => c.empId === emp.id);
+                if (isDone) doneCount++;
+
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-2.5 rounded-lg border text-sm transition-all ${
+                    isDone ? 'bg-emerald-50/70 border-emerald-200' : 'bg-gray-50 border-gray-200'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex flex-col min-w-0 pr-2">
+                        <span class="font-medium ${isDone ? 'text-emerald-900' : 'text-gray-700'} truncate">${emp.name}</span>
+                        <span class="text-[11px] ${isDone ? 'text-emerald-600' : 'text-gray-400'}">${emp.dept}</span>
+                    </div>
+                    <div>
+                        ${isDone 
+                            ? `<span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1 text-[10px]"></i>ทำแล้ว</span>`
+                            : `<span class="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full"><i class="fa-regular fa-clock mr-1 text-[10px]"></i>ยังไม่ได้ทำ</span>`
+                        }
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+
+            if (countBadge) {
+                countBadge.textContent = `${doneCount}/${employees.length} ทำแล้ว`;
+            }
+        }
+
+        // --- REPORTING ---
+        function renderReport() {
+            const tbody = document.getElementById('report-table-body');
+            tbody.innerHTML = '';
+
+            let doneCount = 0;
+            const sortedEmp = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+
+            sortedEmp.forEach(emp => {
+                const record = checkIns.find(c => c.empId === emp.id);
+                const tr = document.createElement('tr');
+                
+                let statusHtml, timeHtml;
+                
+                if (record) {
+                    doneCount++;
+                    statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fa-solid fa-check mr-1 mt-[2px]"></i> Done</span>`;
+                    const dt = new Date(record.timestamp);
+                    timeHtml = `${dt.toLocaleDateString('th-TH')} <span class="text-gray-400 ml-1">${dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span>`;
+                } else {
+                    statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+                    timeHtml = `<span class="text-gray-400">-</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">${emp.name}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-500">${emp.dept}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-center">${statusHtml}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right text-gray-600">${timeHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update summary stats
+            document.getElementById('stat-total').textContent = employees.length;
+            document.getElementById('stat-done').textContent = doneCount;
+            document.getElementById('stat-pending').textContent = employees.length - doneCount;
+        }
+
+        // --- EXPORT TO CSV ---
+        function exportToCSV() {
+            // \uFEFF is the Byte Order Mark (BOM) needed for Excel to read UTF-8 Thai chars properly
+            let csv = '\uFEFF'; 
+            csv += 'Employee Name,Department,Status,Date,Time\n';
+
+            const sortedEmp = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+
+            sortedEmp.forEach(emp => {
+                const record = checkIns.find(c => c.empId === emp.id);
+                let status = 'Pending';
+                let dateStr = '-';
+                let timeStr = '-';
+
+                if (record) {
+                    status = 'Done';
+                    const dt = new Date(record.timestamp);
+                    dateStr = dt.toLocaleDateString('th-TH');
+                    timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+                }
+                
+                // Wrap in quotes to handle commas in names/depts if any
+                csv += `"${emp.name}","${emp.dept}","${status}","${dateStr}","${timeStr}"\n`;
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            
+            // Clean filename
+            const cleanTopic = (appSettings.topic || 'Report').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            link.setAttribute("download", `CheckIn_${cleanTopic}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('Report downloaded as CSV', 'success');
+        }
+
+        // --- CLEAR DATA UTILITY ---
+        function clearCheckInData() {
+            document.getElementById('clear-modal').classList.remove('hidden');
+        }
+        function closeClearModal() {
+            document.getElementById('clear-modal').classList.add('hidden');
+        }
+        function executeClearData() {
+            checkIns = [];
+            persistData();
+            renderReport();
+            closeClearModal();
+            showToast('All check-in records have been reset', 'success');
+        }
+
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let colorClasses = type === 'success' 
+                ? 'bg-green-600 text-white border-green-700' 
+                : 'bg-red-600 text-white border-red-700';
+            
+            let icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
+
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded shadow-lg border-l-4 toast-enter ${colorClasses}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <span class="text-sm font-medium">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
