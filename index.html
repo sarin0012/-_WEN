@@ -10,96 +10,64 @@
     
     <!-- Load FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Load Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        
-        .tab-active {
-            border-bottom: 2px solid #4f46e5;
-            color: #4f46e5;
-            font-weight: 600;
-        }
-        
-        .tab-inactive {
-            color: #6b7280;
-        }
-        
-        .tab-inactive:hover {
-            color: #374151;
-            border-bottom: 2px solid #d1d5db;
-        }
-
-        /* Custom Scrollbar for lists */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Toast Animation */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .toast-enter {
-            animation: slideInRight 0.3s ease-out forwards;
-        }
-        .toast-exit {
-            animation: fadeOut 0.3s ease-out forwards;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+        .tab-inactive { color: #6b7280; }
+        .tab-inactive:hover { color: #374151; border-bottom: 2px solid #d1d5db; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
+        .toast-exit { animation: fadeOut 0.3s ease-out forwards; }
     </style>
 </head>
 <body class="text-gray-800 antialiased h-screen flex flex-col">
 
-    <!-- Header Section -->
     <header class="bg-indigo-600 text-white shadow-md">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
-            <i class="fa-solid fa-clipboard-check text-2xl"></i>
-            <div>
-                <h1 class="text-xl font-bold leading-tight">Smart Check-In</h1>
-                <p class="text-indigo-200 text-xs">Training & Task Completion Tracker</p>
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-clipboard-check text-2xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">Smart Check-In</h1>
+                    <p class="text-indigo-200 text-xs">Training & Task Completion Tracker</p>
+                </div>
+            </div>
+            <div id="sync-status" class="text-xs bg-indigo-800 px-2 py-1 rounded hidden">
+                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> ซิงก์ข้อมูล...
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="flex-grow max-w-5xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
         <!-- Navigation Tabs -->
         <nav class="flex border-b border-gray-200 bg-white rounded-t-lg shadow-sm px-2 pt-2">
             <button id="tab-btn-checkin" onclick="switchTab('checkin')" class="px-6 py-3 text-sm transition-colors tab-active">
-                <i class="fa-solid fa-user-check mr-2"></i> User Check-In
+                <i class="fa-solid fa-user-check mr-2"></i> หน้าลงทะเบียน (User)
             </button>
             <button id="tab-btn-admin" onclick="switchTab('admin')" class="px-6 py-3 text-sm transition-colors tab-inactive">
-                <i class="fa-solid fa-gear mr-2"></i> Admin & Report
+                <i class="fa-solid fa-gear mr-2"></i> ผู้ดูแลระบบ (Admin)
             </button>
         </nav>
 
         <!-- VIEW: USER CHECK-IN -->
         <section id="view-checkin" class="bg-white rounded-b-lg rounded-tr-lg shadow-sm p-6 md:p-8 animate-[slideInRight_0.2s_ease-out]">
             <div class="max-w-lg mx-auto">
-                <!-- Topic Display -->
-                <div class="text-center mb-8 bg-indigo-50 p-6 rounded-xl border border-indigo-100">
-                    <h2 id="display-topic" class="text-2xl font-bold text-indigo-900 mb-2">Loading Topic...</h2>
+                <!-- Activity Selection & Display -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📌 เลือกหัวข้อกิจกรรมที่ต้องการเช็คชื่อ</label>
+                    <select id="user-activity-select" onchange="changeUserActivity()" class="block w-full px-3 py-2 text-base border-gray-300 rounded-md border shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 font-medium text-indigo-900">
+                        <!-- Options populated via JS -->
+                    </select>
+                </div>
+
+                <div class="text-center mb-8 bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                     <div class="flex items-center justify-center gap-4 text-sm text-indigo-700">
                         <span id="display-date-start" title="Start Date"><i class="fa-regular fa-calendar mr-1"></i> -</span>
                         <span class="text-indigo-300"><i class="fa-solid fa-arrow-right"></i></span>
@@ -110,28 +78,26 @@
                 <!-- Check-in Form -->
                 <form id="checkin-form" onsubmit="handleCheckIn(event)" class="space-y-6">
                     <div>
-                        <label for="emp-select" class="block text-sm font-medium text-gray-700 mb-2">Select Your Name</label>
-                        <div class="relative">
-                            <select id="emp-select" required class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border shadow-sm appearance-none bg-white">
-                                <option value="" disabled selected>-- Select your name --</option>
-                                <!-- Employee options will be loaded here -->
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                <i class="fa-solid fa-chevron-down text-sm"></i>
-                            </div>
-                        </div>
+                        <label for="emp-select" class="block text-sm font-medium text-gray-700 mb-2">เลือกรายชื่อของคุณ</label>
+                        <select id="emp-select" required class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border shadow-sm bg-white">
+                            <option value="" disabled selected>-- เลือกรายชื่อของคุณ --</option>
+                        </select>
                     </div>
 
-                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        <i class="fa-solid fa-check-circle mr-2"></i> ทำแล้ว
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-colors">
+                        <i class="fa-solid fa-check-circle mr-2"></i> ทำแล้ว (Mark as Done)
                     </button>
                 </form>
 
                 <!-- Status List Display in User View -->
                 <div class="mt-8 border-t border-gray-200 pt-6">
+                    <div id="user-completion-banner" class="hidden mb-4 p-4 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-lg text-center font-medium animate-bounce shadow-sm">
+                        <i class="fa-solid fa-trophy text-emerald-600 text-xl mr-2"></i> 🎉 ยินดีด้วย! พนักงานเข้าร่วมกิจกรรมนี้ครบทุกคนเรียบร้อยแล้ว
+                    </div>
+
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-semibold text-gray-700 flex items-center">
-                            <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i> รายชื่อพนักงานและสถานะการทำ
+                            <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i> รายชื่อและสถานะในกิจกรรมนี้
                         </h3>
                         <span id="user-status-count" class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">
                             0/0 ทำแล้ว
@@ -153,64 +119,120 @@
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Admin Access</h3>
-                <p class="text-sm text-gray-500 mb-6 text-center">Please enter the administrator password (default: 1234) to manage settings.</p>
+                <!-- Removed default password display for security -->
+                <p class="text-sm text-gray-500 mb-6 text-center">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบผู้ดูแล</p>
                 <form onsubmit="handleAdminLogin(event)" class="w-full space-y-4">
                     <input type="password" id="admin-password-input" placeholder="Enter Password" required class="w-full p-3 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 text-center tracking-widest text-lg">
                     <button type="submit" class="w-full bg-indigo-600 text-white font-medium py-3 rounded shadow hover:bg-indigo-700 transition-colors">
                         <i class="fa-solid fa-key mr-2"></i> Unlock
                     </button>
+                    <div class="text-center pt-2">
+                        <button type="button" onclick="handleForgotPassword()" class="text-xs text-indigo-600 hover:text-indigo-800 underline">
+                            <i class="fa-solid fa-circle-question mr-1"></i> ลืมรหัสผ่าน? (ส่งรหัสผ่านเข้า Email)
+                        </button>
+                    </div>
                 </form>
             </div>
 
-            <!-- ADMIN CONTENT VIEW (Hidden until unlocked) -->
+            <!-- ADMIN CONTENT VIEW -->
             <div id="admin-content-view" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- Left Column: Settings & Employee Mgmt -->
                 <div class="lg:col-span-1 space-y-6">
                     
-                    <!-- 1. Topic & Date Settings -->
-                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2"><i class="fa-solid fa-pen-to-square text-indigo-500 mr-2"></i> Event Settings</h3>
-                        <form id="settings-form" onsubmit="saveSettings(event)" class="space-y-4">
+                    <!-- 0. Admin Security & Notification Settings -->
+                    <div class="bg-indigo-50/70 p-5 rounded-lg border border-indigo-200">
+                        <h3 class="text-lg font-semibold mb-3 text-indigo-900 border-b border-indigo-200 pb-2 flex justify-between items-center">
+                            <span><i class="fa-solid fa-sliders text-indigo-600 mr-2"></i> ตั้งค่าผู้ดูแล & การแจ้งเตือน</span>
+                        </h3>
+                        <form id="admin-settings-form" onsubmit="saveAdminSettings(event)" class="space-y-3">
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Topic / Event Name</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1"><i class="fa-solid fa-envelope text-indigo-500 mr-1"></i> Email ผู้ดูแลระบบ 1 (รับแจ้งเตือน)</label>
+                                <input type="email" id="setting-admin-email1" placeholder="admin1@example.com" class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1"><i class="fa-solid fa-envelope text-indigo-500 mr-1"></i> Email ผู้ดูแลระบบ 2 (สำรอง)</label>
+                                <input type="email" id="setting-admin-email2" placeholder="admin2@example.com" class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1"><i class="fa-solid fa-lock text-indigo-500 mr-1"></i> รหัสผ่านเข้าสู่ระบบ Admin</label>
+                                <input type="password" id="setting-admin-pass" placeholder="เปลี่ยนรหัสผ่านใหม่" class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 bg-white">
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-700 text-white text-xs py-2 rounded font-medium hover:bg-indigo-800 transition-colors shadow-sm">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกการตั้งค่า Admin
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 1. Activity Management -->
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2"><i class="fa-solid fa-calendar-days text-indigo-500 mr-2"></i> จัดการกิจกรรม</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">เลือกกิจกรรมเพื่อแก้ไข / สร้างใหม่</label>
+                            <select id="admin-activity-select" onchange="changeAdminActivity()" class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 mb-2 bg-white">
+                                <option value="new" class="text-indigo-600 font-semibold">+ สร้างกิจกรรมใหม่ (Create New)</option>
+                            </select>
+                        </div>
+
+                        <form id="settings-form" onsubmit="saveActivity(event)" class="space-y-4">
+                            <input type="hidden" id="setting-act-id">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อหัวข้อ / กิจกรรม</label>
                                 <input type="text" id="setting-topic" required class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">วันเริ่มต้น</label>
                                     <input type="date" id="setting-start" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">วันสิ้นสุด</label>
                                     <input type="date" id="setting-end" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
-                            <button type="submit" class="w-full bg-gray-800 text-white text-sm py-2 rounded hover:bg-gray-900 transition-colors">
-                                Save Settings
-                            </button>
+                            
+                            <!-- Participant Selection -->
+                            <div class="mt-3">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">ผู้เข้าร่วมกิจกรรม</label>
+                                <div class="flex gap-2 mb-2">
+                                    <button type="button" onclick="selectAllParticipants(true)" class="text-[11px] bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300 transition-colors">เลือกทั้งหมด</button>
+                                    <button type="button" onclick="selectAllParticipants(false)" class="text-[11px] bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300 transition-colors">เอาออกทั้งหมด</button>
+                                </div>
+                                <div id="participant-checkboxes" class="max-h-36 overflow-y-auto border border-gray-300 rounded p-2 text-sm space-y-1 bg-white custom-scrollbar">
+                                    <!-- Populated via JS -->
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 pt-2">
+                                <button type="submit" class="flex-1 bg-gray-800 text-white text-sm py-2 rounded hover:bg-gray-900 transition-colors">
+                                    บันทึกกิจกรรม
+                                </button>
+                                <button type="button" onclick="setAsDefaultActivity()" id="btn-set-default" class="flex-1 bg-indigo-100 text-indigo-700 border border-indigo-300 text-sm py-2 rounded hover:bg-indigo-200 transition-colors">
+                                    ตั้งเป็นค่าเริ่มต้น
+                                </button>
+                                <button type="button" onclick="openDeleteActivityModal()" id="btn-delete-activity" class="bg-red-100 text-red-700 border border-red-300 text-sm py-2 px-3 rounded hover:bg-red-200 transition-colors hidden" title="ลบกิจกรรม">
+                                    <i class="fa-solid fa-trash"></i> ลบ
+                                </button>
+                            </div>
                         </form>
                     </div>
 
                     <!-- 2. Employee Management -->
                     <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 flex flex-col h-[400px]">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 flex justify-between items-center">
-                            <span><i class="fa-solid fa-users text-indigo-500 mr-2"></i> Employees</span>
+                            <span><i class="fa-solid fa-users text-indigo-500 mr-2"></i> พนักงาน</span>
                             <span id="emp-count-badge" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
                         </h3>
                         
-                        <!-- Add Form -->
                         <form id="add-emp-form" onsubmit="addEmployee(event)" class="mb-4 flex flex-col gap-2">
-                            <input type="text" id="new-emp-name" placeholder="Full Name" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" id="new-emp-name" placeholder="ชื่อ-นามสกุล" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500">
                             <div class="flex gap-2">
-                                <input type="text" id="new-emp-dept" placeholder="Department" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
-                                <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition-colors whitespace-nowrap">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                                <input type="text" id="new-emp-dept" placeholder="แผนก" required class="w-full p-2 text-sm border border-gray-300 rounded focus:ring-indigo-500">
+                                <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition-colors whitespace-nowrap"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </form>
 
-                        <!-- Employee List -->
                         <div id="employee-list" class="flex-grow overflow-y-auto custom-scrollbar bg-white border border-gray-200 rounded divide-y divide-gray-100">
                             <!-- Populated via JS -->
                         </div>
@@ -220,49 +242,49 @@
                 <!-- Right Column: Report & Data -->
                 <div class="lg:col-span-2">
                     <div class="bg-white p-0 rounded-lg flex flex-col h-full">
-                        <div class="flex justify-between items-end mb-4 border-b pb-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 border-b pb-4 gap-4">
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-800"><i class="fa-solid fa-chart-bar text-indigo-500 mr-2"></i> Status Report</h3>
-                                <p class="text-sm text-gray-500 mt-1">Real-time overview of completions.</p>
+                                <h3 class="text-xl font-semibold text-gray-800"><i class="fa-solid fa-chart-bar text-indigo-500 mr-2"></i> รายงานสถานะ</h3>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-sm text-gray-600">ตัวกรอง:</span>
+                                    <select id="report-activity-select" onchange="renderReport()" class="p-1.5 text-sm border border-gray-300 rounded bg-gray-50 focus:ring-indigo-500">
+                                        <option value="all">-- ทุกกิจกรรมรวมกัน --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="logoutAdmin()" class="text-xs bg-gray-100 text-gray-600 border border-gray-300 px-3 py-2 rounded hover:bg-gray-200 transition-colors" title="Lock Admin Panel">
-                                    <i class="fa-solid fa-lock"></i>
-                                </button>
-                                <button onclick="clearCheckInData()" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded hover:bg-red-100 transition-colors">
-                                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset Data
-                                </button>
-                                <button onclick="exportToCSV()" class="text-xs bg-green-600 text-white px-3 py-2 rounded shadow-sm hover:bg-green-700 transition-colors">
-                                    <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
-                                </button>
+                                <button onclick="logoutAdmin()" class="text-xs bg-gray-100 text-gray-600 border border-gray-300 px-3 py-2 rounded hover:bg-gray-200" title="Lock"><i class="fa-solid fa-lock"></i></button>
+                                <button onclick="fetchCloudData(true)" class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-3 py-2 rounded hover:bg-blue-100"><i class="fa-solid fa-rotate mr-1"></i> รีเฟรชข้อมูล</button>
+                                <button onclick="exportToCSV()" class="text-xs bg-green-600 text-white px-3 py-2 rounded shadow-sm hover:bg-green-700"><i class="fa-solid fa-file-csv mr-1"></i> โหลด CSV</button>
                             </div>
                         </div>
 
                         <!-- Summary Cards -->
                         <div class="grid grid-cols-3 gap-4 mb-6">
                             <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 text-center">
-                                <div class="text-indigo-500 text-xs font-bold uppercase tracking-wide mb-1">Total</div>
+                                <div class="text-indigo-500 text-xs font-bold uppercase tracking-wide mb-1">เป้าหมาย (คน)</div>
                                 <div id="stat-total" class="text-2xl font-bold text-indigo-900">0</div>
                             </div>
                             <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100 text-center">
-                                <div class="text-emerald-600 text-xs font-bold uppercase tracking-wide mb-1">Completed</div>
+                                <div class="text-emerald-600 text-xs font-bold uppercase tracking-wide mb-1">ทำแล้ว</div>
                                 <div id="stat-done" class="text-2xl font-bold text-emerald-900">0</div>
                             </div>
                             <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 text-center">
-                                <div class="text-amber-600 text-xs font-bold uppercase tracking-wide mb-1">Pending</div>
+                                <div class="text-amber-600 text-xs font-bold uppercase tracking-wide mb-1">ค้างทำ</div>
                                 <div id="stat-pending" class="text-2xl font-bold text-amber-900">0</div>
                             </div>
                         </div>
 
-                        <!-- Data Table -->
+                        <!-- Data Table with Admin Edit Action -->
                         <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
                             <table class="min-w-full divide-y divide-gray-200 text-sm">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-600">Employee Name</th>
-                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-600">Dept</th>
-                                        <th scope="col" class="px-4 py-3 text-center font-semibold text-gray-600">Status</th>
-                                        <th scope="col" class="px-4 py-3 text-right font-semibold text-gray-600">Timestamp</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">ชื่อพนักงาน</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">แผนก</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600 hidden md:table-cell">กิจกรรม</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-600">สถานะ</th>
+                                        <th class="px-4 py-3 text-center font-semibold text-gray-600">แก้ไข (Admin)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="report-table-body" class="bg-white divide-y divide-gray-200">
@@ -276,70 +298,131 @@
         </section>
     </main>
 
-    <!-- Custom Delete Confirmation Modal (Replaces browser confirm()) -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden animate-[slideInRight_0.2s_ease-out]">
+    <!-- Modal confirmation -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden">
             <div class="p-6">
                 <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 mx-auto">
                     <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Delete Employee</h3>
-                <p id="delete-modal-msg" class="text-sm text-gray-500 text-center mb-6">Are you sure you want to remove this employee?</p>
+                <h3 id="delete-modal-title" class="text-lg font-medium text-gray-900 text-center mb-2">ยืนยันการลบ</h3>
+                <p id="delete-modal-msg" class="text-sm text-gray-500 text-center mb-6">คุณแน่ใจหรือไม่ที่จะลบรายการนี้?</p>
                 <div class="flex gap-3">
-                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                    <button id="btn-confirm-delete" class="flex-1 px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors">Delete</button>
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                    <button id="btn-confirm-delete" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-white">ลบ</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Clear Data Confirmation Modal -->
-    <div id="clear-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden animate-[slideInRight_0.2s_ease-out]">
-            <div class="p-6">
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 mx-auto">
-                    <i class="fa-solid fa-rotate-left text-red-600 text-xl"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Reset All Check-ins?</h3>
-                <p class="text-sm text-gray-500 text-center mb-6">This will clear all completion records. Employees will remain. This action cannot be undone.</p>
-                <div class="flex gap-3">
-                    <button onclick="closeClearModal()" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                    <button onclick="executeClearData()" class="flex-1 px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors">Yes, Reset</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col gap-2 z-50"></div>
 
     <script>
-        // --- DATA & STATE MANAGEMENT ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBVpQKQgyUbHAMKe33n6fQrfD4ft1je_YaDIjhudD_b21Kb_flzuP00BjCD02b8zKV/exec';
-
-        // Default Sample Data
-        const defaultEmployees = [
-            { id: 'emp_1', name: 'Somchai Jaidee', dept: 'IT' },
-            { id: 'emp_2', name: 'Suda Rakngan', dept: 'HR' },
-            { id: 'emp_3', name: 'Nitiwadee Sooksan', dept: 'Marketing' }
-        ];
-
-        // Auth State
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgFKlbT0fBE6hsAlnDx7e9CmJubFtk_-D__scQRSFej7LJa6liiNzZduLb-VKXVFE8/exec';
+        
+        let activities = [];
+        let employees = [];
+        let checkIns = [];
         let isAdminAuthenticated = false;
-        const ADMIN_PASSWORD = "1234";
+        let adminPassword = "1234";
+        let adminEmail1 = "";
+        let adminEmail2 = "";
 
-        // Load from LocalStorage or use defaults
-        let appSettings = JSON.parse(localStorage.getItem('chktrk_settings')) || {
-            topic: 'Cybersecurity Annual Training 2024',
-            startDate: '',
-            endDate: ''
+        window.onload = async () => {
+            await fetchCloudData();
         };
-        let employees = JSON.parse(localStorage.getItem('chktrk_employees')) || defaultEmployees;
-        let checkIns = JSON.parse(localStorage.getItem('chktrk_data')) || [];
 
-        // Helper for sending data to Google Apps Script
+        async function fetchCloudData(showNotify = false) {
+            if (showNotify) document.getElementById('sync-status').classList.remove('hidden');
+            try {
+                const cacheBusterUrl = SCRIPT_URL + '?t=' + new Date().getTime();
+                const res = await fetch(cacheBusterUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    activities = data.activities || [];
+                    employees = data.employees || [];
+                    checkIns = data.checkIns || [];
+                    
+                    if (data.settings) {
+                        adminPassword = data.settings.adminPassword || "1234";
+                        adminEmail1 = data.settings.adminEmail1 || "";
+                        adminEmail2 = data.settings.adminEmail2 || "";
+                        
+                        document.getElementById('setting-admin-email1').value = adminEmail1;
+                        document.getElementById('setting-admin-email2').value = adminEmail2;
+                        document.getElementById('setting-admin-pass').value = adminPassword;
+                    }
+                    
+                    if (activities.length === 0) {
+                        activities = [{
+                            id: 'act_default',
+                            topic: 'อบรมแบบทดสอบประจำปี',
+                            startDate: new Date().toISOString().split('T')[0],
+                            endDate: new Date().toISOString().split('T')[0],
+                            isDefault: true,
+                            participants: 'ALL'
+                        }];
+                    }
+
+                    updateAllViews();
+                    if (showNotify) showToast('ข้อมูลอัปเดตล่าสุดแล้ว', 'success');
+                }
+            } catch (err) {
+                console.error('Fetch Error:', err);
+                if (activities.length === 0) {
+                    activities = [{
+                        id: 'act_default',
+                        topic: 'อบรมแบบทดสอบประจำปี',
+                        startDate: new Date().toISOString().split('T')[0],
+                        endDate: new Date().toISOString().split('T')[0],
+                        isDefault: true,
+                        participants: 'ALL'
+                    }];
+                    updateAllViews();
+                }
+                showToast('กำลังใช้งานโหมดจำลอง (ไม่สามารถดึงจาก Cloud ได้)', 'error');
+            } finally {
+                document.getElementById('sync-status').classList.add('hidden');
+            }
+        }
+
+        async function saveAdminSettings(e) {
+            e.preventDefault();
+            const email1 = document.getElementById('setting-admin-email1').value.trim();
+            const email2 = document.getElementById('setting-admin-email2').value.trim();
+            const pass = document.getElementById('setting-admin-pass').value.trim();
+
+            if (!pass) {
+                showToast('กรุณาระบุรหัสผ่านผู้ดูแลระบบ', 'error');
+                return;
+            }
+
+            adminEmail1 = email1;
+            adminEmail2 = email2;
+            adminPassword = pass;
+
+            showToast('กำลังบันทึกการตั้งค่า Admin...', 'success');
+            await sendToCloud({
+                action: 'saveSettings',
+                adminPassword: pass,
+                adminEmail1: email1,
+                adminEmail2: email2
+            });
+
+            showToast('บันทึกการตั้งค่าผู้ดูแลเรียบร้อยแล้ว', 'success');
+        }
+
+        async function handleForgotPassword() {
+            if (!adminEmail1 && !adminEmail2) {
+                showToast('ยังไม่ได้ตั้งค่า Email Admin ในระบบ สามารถตรวจสอบใน Google Sheet ชีต Settings ได้', 'error');
+                return;
+            }
+            showToast('กำลังส่งรหัสผ่านไปยัง Email Admin...', 'success');
+            await sendToCloud({ action: 'forgotPassword' });
+            showToast('ระบบส่งรหัสผ่านไปยัง Email Admin เรียบร้อยแล้ว', 'success');
+        }
+
         async function sendToCloud(payload) {
-            if (!SCRIPT_URL) return;
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -347,496 +430,611 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-            } catch (err) {
-                console.error('Cloud Sync Error:', err);
-            }
+            } catch (err) { console.error('Cloud Sync Error:', err); }
         }
 
-        // Helper for fetching real-time data from Google Sheet
-        async function fetchCloudData() {
-            if (!SCRIPT_URL) return;
-            try {
-                const res = await fetch(SCRIPT_URL);
-                if (!res.ok) return;
-                const data = await res.json();
-                if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
-                    employees = data.employees;
-                }
-                if (data.checkIns && Array.isArray(data.checkIns)) {
-                    checkIns = data.checkIns;
-                }
-                if (data.settings && data.settings.topic) {
-                    appSettings = data.settings;
-                }
-                persistData();
-                updateCheckInHeaders();
-                renderDropdown();
-                renderEmployeeListAdmin();
-                renderReport();
-                renderUserStatusList();
-            } catch (err) {
-                console.warn('Using local data fallback:', err);
-            }
-        }
-
-        // Save data back to localStorage
-        function persistData() {
-            localStorage.setItem('chktrk_settings', JSON.stringify(appSettings));
-            localStorage.setItem('chktrk_employees', JSON.stringify(employees));
-            localStorage.setItem('chktrk_data', JSON.stringify(checkIns));
-        }
-
-        // --- INITIALIZATION ---
-        window.onload = async () => {
-            // Apply settings to Admin form
-            document.getElementById('setting-topic').value = appSettings.topic;
-            document.getElementById('setting-start').value = appSettings.startDate;
-            document.getElementById('setting-end').value = appSettings.endDate;
-
-            // Render UI
-            updateCheckInHeaders();
-            renderDropdown();
+        function updateAllViews() {
+            renderActivityDropdowns();
+            changeUserActivity();
             renderEmployeeListAdmin();
             renderReport();
-            renderUserStatusList();
-
-            // Fetch latest data from Google Sheet
-            await fetchCloudData();
-        };
-
-        // --- TAB SWITCHING LOGIC ---
-        function switchTab(tabId) {
-            const vCheckin = document.getElementById('view-checkin');
-            const vAdmin = document.getElementById('view-admin');
-            const bCheckin = document.getElementById('tab-btn-checkin');
-            const bAdmin = document.getElementById('tab-btn-admin');
-
-            if (tabId === 'checkin') {
-                vCheckin.classList.remove('hidden');
-                vAdmin.classList.add('hidden');
-                bCheckin.className = 'px-6 py-3 text-sm transition-colors tab-active';
-                bAdmin.className = 'px-6 py-3 text-sm transition-colors tab-inactive';
-                // Refresh headers when coming back
-                updateCheckInHeaders();
-                renderDropdown();
-                renderUserStatusList();
-            } else {
-                vCheckin.classList.add('hidden');
-                vAdmin.classList.remove('hidden');
-                bCheckin.className = 'px-6 py-3 text-sm transition-colors tab-inactive';
-                bAdmin.className = 'px-6 py-3 text-sm transition-colors tab-active';
-                
-                // Check Authentication
-                if (isAdminAuthenticated) {
-                    document.getElementById('admin-login-view').classList.add('hidden');
-                    document.getElementById('admin-content-view').classList.remove('hidden');
-                    renderEmployeeListAdmin();
-                    renderReport();
-                } else {
-                    document.getElementById('admin-login-view').classList.remove('hidden');
-                    document.getElementById('admin-content-view').classList.add('hidden');
-                    document.getElementById('admin-password-input').value = '';
-                    setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
-                }
-            }
         }
 
-        // --- ADMIN AUTHENTICATION ---
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const input = document.getElementById('admin-password-input').value;
+        function renderActivityDropdowns() {
+            const userSel = document.getElementById('user-activity-select');
+            const adminSel = document.getElementById('admin-activity-select');
+            const reportSel = document.getElementById('report-activity-select');
             
-            if (input === ADMIN_PASSWORD) {
-                isAdminAuthenticated = true;
-                showToast('Admin Access Granted', 'success');
-                document.getElementById('admin-login-view').classList.add('hidden');
-                document.getElementById('admin-content-view').classList.remove('hidden');
-                // Render admin data after unlock
-                renderEmployeeListAdmin();
-                renderReport();
-            } else {
-                showToast('Incorrect Password', 'error');
-                document.getElementById('admin-password-input').value = '';
-                document.getElementById('admin-password-input').focus();
-            }
-        }
+            const currUserSel = userSel.value;
+            const currAdminSel = adminSel.value;
+            const currReportSel = reportSel.value;
 
-        function logoutAdmin() {
-            isAdminAuthenticated = false;
-            showToast('Locked successfully', 'success');
-            document.getElementById('admin-content-view').classList.add('hidden');
-            document.getElementById('admin-login-view').classList.remove('hidden');
-            document.getElementById('admin-password-input').value = '';
-        }
+            userSel.innerHTML = '';
+            adminSel.innerHTML = '<option value="new" class="text-indigo-600 font-semibold">+ สร้างกิจกรรมใหม่ (Create New)</option>';
+            reportSel.innerHTML = '<option value="all">-- ทุกกิจกรรมรวมกัน --</option>';
 
-        // --- ADMIN: SETTINGS ---
-        function saveSettings(e) {
-            e.preventDefault();
-            appSettings.topic = document.getElementById('setting-topic').value;
-            appSettings.startDate = document.getElementById('setting-start').value;
-            appSettings.endDate = document.getElementById('setting-end').value;
-            
-            persistData();
-
-            // Send to Google Sheet
-            sendToCloud({
-                action: 'saveSettings',
-                topic: appSettings.topic,
-                startDate: appSettings.startDate,
-                endDate: appSettings.endDate
-            });
-
-            updateCheckInHeaders();
-            showToast('Settings saved to Cloud & Local', 'success');
-        }
-
-        // --- ADMIN: EMPLOYEE MANAGEMENT ---
-        function addEmployee(e) {
-            e.preventDefault();
-            const nameInput = document.getElementById('new-emp-name');
-            const deptInput = document.getElementById('new-emp-dept');
-            
-            const newEmp = {
-                id: 'emp_' + Date.now(),
-                name: nameInput.value.trim(),
-                dept: deptInput.value.trim()
-            };
-
-            if (newEmp.name && newEmp.dept) {
-                employees.push(newEmp);
-                persistData();
-                
-                // Send to Google Sheet
-                sendToCloud({
-                    action: 'addEmployee',
-                    id: newEmp.id,
-                    name: newEmp.name,
-                    dept: newEmp.dept
-                });
-
-                // Update UI
-                nameInput.value = '';
-                deptInput.value = '';
-                renderEmployeeListAdmin();
-                renderDropdown();
-                renderReport();
-                renderUserStatusList();
-                
-                showToast('Employee added to Cloud', 'success');
-            }
-        }
-
-        // Variables for custom delete modal
-        let employeeToDeleteId = null;
-
-        function openDeleteModal(id, name) {
-            employeeToDeleteId = id;
-            document.getElementById('delete-modal-msg').innerHTML = `Are you sure you want to remove <strong>${name}</strong>?`;
-            document.getElementById('delete-modal').classList.remove('hidden');
-            
-            // Attach specific event to confirm button
-            document.getElementById('btn-confirm-delete').onclick = function() {
-                executeDelete();
-            };
-        }
-
-        function closeDeleteModal() {
-            employeeToDeleteId = null;
-            document.getElementById('delete-modal').classList.add('hidden');
-        }
-
-        function executeDelete() {
-            if (!employeeToDeleteId) return;
-            
-            // Send delete action to Google Sheet
-            sendToCloud({
-                action: 'deleteEmployee',
-                id: employeeToDeleteId
-            });
-
-            // Remove from local employee list
-            employees = employees.filter(emp => emp.id !== employeeToDeleteId);
-            checkIns = checkIns.filter(chk => chk.empId !== employeeToDeleteId);
-            
-            persistData();
-            renderEmployeeListAdmin();
-            renderDropdown();
-            renderReport();
-            renderUserStatusList();
-            
-            closeDeleteModal();
-            showToast('Employee deleted from Cloud', 'success');
-        }
-
-        function renderEmployeeListAdmin() {
-            const list = document.getElementById('employee-list');
-            document.getElementById('emp-count-badge').textContent = employees.length;
-            list.innerHTML = '';
-
-            if (employees.length === 0) {
-                list.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">No employees found.</div>`;
+            if (activities.length === 0) {
+                userSel.innerHTML = '<option value="" disabled selected>-- ไม่มีกิจกรรม --</option>';
                 return;
             }
 
-            // Sort alphabetical
-            const sorted = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+            let defaultId = activities[0].id;
 
-            sorted.forEach(emp => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center p-3 hover:bg-gray-50';
-                div.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-800">${emp.name}</span>
-                        <span class="text-xs text-gray-500">${emp.dept}</span>
-                    </div>
-                    <button onclick="openDeleteModal('${emp.id}', '${emp.name}')" class="text-gray-400 hover:text-red-500 p-2 rounded transition-colors" title="Delete">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                `;
-                list.appendChild(div);
+            activities.forEach(act => {
+                const isDefStr = act.isDefault ? ' (ค่าเริ่มต้น)' : '';
+                if (act.isDefault) defaultId = act.id;
+
+                userSel.add(new Option(act.topic + isDefStr, act.id));
+                adminSel.add(new Option(act.topic + isDefStr, act.id));
+                reportSel.add(new Option(act.topic, act.id));
             });
+
+            const targetUserVal = currUserSel && activities.some(a => a.id === currUserSel) ? currUserSel : defaultId;
+            userSel.value = targetUserVal;
+            
+            if (currAdminSel && (currAdminSel === 'new' || activities.some(a => a.id === currAdminSel))) {
+                adminSel.value = currAdminSel;
+            } else {
+                adminSel.value = 'new';
+            }
+
+            if (currReportSel && (currReportSel === 'all' || activities.some(a => a.id === currReportSel))) {
+                reportSel.value = currReportSel;
+            } else {
+                reportSel.value = 'all';
+            }
+            
+            changeAdminActivity();
         }
 
-        // --- USER CHECK-IN ---
-        function updateCheckInHeaders() {
-            document.getElementById('display-topic').textContent = appSettings.topic || 'Untitled Event';
+        function changeUserActivity() {
+            const userSel = document.getElementById('user-activity-select');
+            const actId = userSel.value;
+            const act = activities.find(a => a.id === actId);
             
             const formatDt = (d) => {
-                if(!d) return '-';
+                if (!d) return '-';
                 const dateObj = new Date(d);
                 return isNaN(dateObj) ? d : dateObj.toLocaleDateString('th-TH');
             };
 
-            document.getElementById('display-date-start').innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${formatDt(appSettings.startDate)}`;
-            document.getElementById('display-date-end').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> ${formatDt(appSettings.endDate)}`;
+            document.getElementById('display-date-start').innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> เริ่ม: ${act ? formatDt(act.startDate) : '-'}`;
+            document.getElementById('display-date-end').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> สิ้นสุด: ${act ? formatDt(act.endDate) : '-'}`;
+            
+            renderUserStatusList();
+            renderEmployeeDropdown(); 
         }
 
-        function renderDropdown() {
-            const select = document.getElementById('emp-select');
-            // Keep the first default option
-            select.innerHTML = '<option value="" disabled selected>-- Select your name --</option>';
+        function changeAdminActivity() {
+            const actId = document.getElementById('admin-activity-select').value;
+            const btnDefault = document.getElementById('btn-set-default');
+            const btnDelete = document.getElementById('btn-delete-activity');
             
-            const sorted = [...employees].sort((a,b) => a.name.localeCompare(b.name));
-            sorted.forEach(emp => {
-                const opt = document.createElement('option');
-                opt.value = emp.id;
-                opt.textContent = `${emp.name} (${emp.dept})`;
-                select.appendChild(opt);
+            if (actId === 'new') {
+                document.getElementById('setting-act-id').value = 'act_' + Date.now();
+                document.getElementById('setting-topic').value = '';
+                document.getElementById('setting-start').value = '';
+                document.getElementById('setting-end').value = '';
+                btnDefault.classList.add('hidden');
+                if (btnDelete) btnDelete.classList.add('hidden');
+                renderParticipantCheckboxes('ALL');
+            } else {
+                const act = activities.find(a => a.id === actId);
+                if (act) {
+                    document.getElementById('setting-act-id').value = act.id;
+                    document.getElementById('setting-topic').value = act.topic;
+                    
+                    const formatForInput = (dStr) => {
+                        if(!dStr) return '';
+                        try { const d = new Date(dStr); return isNaN(d) ? '' : d.toISOString().split('T')[0]; } catch(e){ return ''; }
+                    };
+                    
+                    document.getElementById('setting-start').value = formatForInput(act.startDate);
+                    document.getElementById('setting-end').value = formatForInput(act.endDate);
+                    
+                    btnDefault.classList.remove('hidden');
+                    if (btnDelete) btnDelete.classList.remove('hidden');
+
+                    if (act.isDefault) {
+                        btnDefault.textContent = '★ เป็นค่าเริ่มต้นอยู่แล้ว';
+                        btnDefault.className = 'flex-1 bg-indigo-600 text-white text-sm py-2 rounded hover:bg-indigo-700 transition-colors';
+                    } else {
+                        btnDefault.textContent = 'ตั้งเป็นค่าเริ่มต้น';
+                        btnDefault.className = 'flex-1 bg-indigo-100 text-indigo-700 border border-indigo-300 text-sm py-2 rounded hover:bg-indigo-200 transition-colors';
+                    }
+
+                    renderParticipantCheckboxes(act.participants);
+                }
+            }
+        }
+
+        function renderParticipantCheckboxes(selectedParticipants) {
+            const container = document.getElementById('participant-checkboxes');
+            container.innerHTML = '';
+            
+            if (employees.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-xs">ยังไม่มีรายชื่อพนักงานในระบบ</span>';
+                return;
+            }
+
+            [...employees].sort((a,b) => a.name.localeCompare(b.name)).forEach(emp => {
+                const isChecked = selectedParticipants === 'ALL' || (Array.isArray(selectedParticipants) && selectedParticipants.includes(emp.id));
+                
+                const label = document.createElement('label');
+                label.className = 'flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-50 rounded';
+                label.innerHTML = `
+                    <input type="checkbox" value="${emp.id}" class="participant-cb h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" ${isChecked ? 'checked' : ''}>
+                    <span class="text-gray-700">${emp.name} <span class="text-xs text-gray-400">(${emp.dept})</span></span>
+                `;
+                container.appendChild(label);
             });
         }
 
-        // --- USER CHECK-IN ---
+        function selectAllParticipants(check) {
+            const checkboxes = document.querySelectorAll('.participant-cb');
+            checkboxes.forEach(cb => cb.checked = check);
+        }
+
+        async function saveActivity(e) {
+            e.preventDefault();
+            const id = document.getElementById('setting-act-id').value;
+            const topic = document.getElementById('setting-topic').value;
+            const startDate = document.getElementById('setting-start').value;
+            const endDate = document.getElementById('setting-end').value;
+
+            const checkboxes = document.querySelectorAll('.participant-cb');
+            const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            
+            let participantsStr = "NONE";
+            if (selectedIds.length === employees.length && employees.length > 0) {
+                participantsStr = "ALL";
+            } else if (selectedIds.length > 0) {
+                participantsStr = selectedIds.join(',');
+            }
+
+            showToast('กำลังบันทึกกิจกรรม...', 'success');
+            
+            let act = activities.find(a => a.id === id);
+            if (!act) {
+                act = { 
+                    id, topic, startDate, endDate, 
+                    isDefault: activities.length === 0, 
+                    participants: participantsStr === 'ALL' ? 'ALL' : selectedIds 
+                };
+                activities.push(act);
+            } else {
+                act.topic = topic; act.startDate = startDate; act.endDate = endDate; 
+                act.participants = participantsStr === 'ALL' ? 'ALL' : selectedIds;
+            }
+
+            await sendToCloud({
+                action: 'saveActivity',
+                id: id, topic: topic, startDate: startDate, endDate: endDate,
+                participants: participantsStr
+            });
+
+            updateAllViews();
+            document.getElementById('admin-activity-select').value = id;
+            changeAdminActivity();
+            
+            showToast('บันทึกกิจกรรมเรียบร้อยแล้ว', 'success');
+        }
+
+        async function setAsDefaultActivity() {
+            const id = document.getElementById('setting-act-id').value;
+            if (id === 'new' || !id) return;
+
+            activities.forEach(a => a.isDefault = (a.id === id));
+            showToast('กำลังอัปเดตค่าเริ่มต้น...', 'success');
+            
+            await sendToCloud({ action: 'setDefaultActivity', id: id });
+            
+            updateAllViews();
+            showToast('เปลี่ยนค่าเริ่มต้นเรียบร้อยแล้ว', 'success');
+        }
+
+        function renderEmployeeDropdown() {
+            const select = document.getElementById('emp-select');
+            const currentEmpVal = select.value;
+            
+            select.innerHTML = '<option value="" disabled selected>-- เลือกรายชื่อของคุณ --</option>';
+            
+            const actId = document.getElementById('user-activity-select').value;
+            const currentAct = activities.find(a => a.id === actId);
+            
+            let targetEmployees = [];
+            if (!currentAct || currentAct.participants === 'ALL') {
+                targetEmployees = [...employees];
+            } else if (Array.isArray(currentAct.participants)) {
+                targetEmployees = employees.filter(emp => currentAct.participants.includes(emp.id));
+            } 
+
+            targetEmployees.sort((a,b) => a.name.localeCompare(b.name)).forEach(emp => {
+                select.add(new Option(`${emp.name} (${emp.dept})`, emp.id));
+            });
+
+            if (currentEmpVal && targetEmployees.some(e => e.id === currentEmpVal)) {
+                select.value = currentEmpVal;
+            }
+        }
+
         async function handleCheckIn(e) {
             e.preventDefault();
-            const empId = document.getElementById('emp-select').value;
             
-            if (!empId) {
-                showToast('Please select your name first.', 'error');
-                return;
+            const userActSelect = document.getElementById('user-activity-select');
+            const empSelect = document.getElementById('emp-select');
+            
+            const actId = userActSelect.value;
+            const empId = empSelect.value;
+            
+            if (!actId) { 
+                showToast('กรุณาเลือกกิจกรรมก่อน', 'error'); 
+                return; 
+            }
+            if (!empId) { 
+                showToast('กรุณาเลือกชื่อของคุณ', 'error'); 
+                return; 
             }
 
-            // Check if already done
-            const existing = checkIns.find(c => c.empId === empId);
-            if (existing) {
-                showToast('You have already marked this as done!', 'error');
-                return;
-            }
+            const existing = checkIns.find(c => c.empId === empId && c.activityId === actId);
+            if (existing) { showToast('คุณทำรายการในกิจกรรมนี้ไปแล้ว!', 'error'); return; }
 
             const empData = employees.find(emp => emp.id === empId);
-            showToast('Saving to Google Sheet...', 'success');
+            const actData = activities.find(act => act.id === actId);
+            
+            showToast('กำลังบันทึกข้อมูล...', 'success');
 
-            // Send Check-In action to Google Sheet
+            checkIns.push({
+                empId: empId,
+                topic: actData ? actData.topic : '',
+                activityId: actId,
+                timestamp: new Date().toISOString()
+            });
+            
+            renderUserStatusList();
+            renderReport();
+            
+            empSelect.selectedIndex = 0;
+
             await sendToCloud({
                 action: 'checkIn',
                 empId: empData ? empData.id : empId,
-                name: empData ? empData.name : '',
-                dept: empData ? empData.dept : '',
-                topic: appSettings.topic || ''
+                name: empData ? empData.name : 'Unknown',
+                dept: empData ? empData.dept : '-',
+                topic: actData ? actData.topic : '',
+                activityId: actId
             });
-
-            // Record check-in locally
-            checkIns.push({
-                empId: empId,
-                timestamp: new Date().toISOString()
-            });
-
-            persistData();
-            renderReport();
-            renderUserStatusList();
-            document.getElementById('emp-select').value = '';
-            showToast('Checked in & Saved to Google Sheet!', 'success');
+            
+            showToast('เช็คชื่อสำเร็จแล้ว!', 'success');
         }
 
-        // --- USER STATUS LIST DISPLAY ---
         function renderUserStatusList() {
             const listContainer = document.getElementById('user-status-list');
             const countBadge = document.getElementById('user-status-count');
-            if (!listContainer) return;
-
+            const banner = document.getElementById('user-completion-banner');
+            const actId = document.getElementById('user-activity-select').value;
+            
             listContainer.innerHTML = '';
-            let doneCount = 0;
+            const currentAct = activities.find(a => a.id === actId);
 
-            const sorted = [...employees].sort((a, b) => a.name.localeCompare(b.name));
-
-            if (sorted.length === 0) {
-                listContainer.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-4">ไม่มีข้อมูลพนักงาน</div>';
-                if (countBadge) countBadge.textContent = '0/0 ทำแล้ว';
+            if (!actId || !currentAct) {
+                listContainer.innerHTML = '<div class="col-span-1 sm:col-span-2 text-center text-sm text-gray-500 py-6">กรุณาเลือกกิจกรรม</div>';
+                countBadge.textContent = '0/0 ทำแล้ว';
+                if (banner) banner.classList.add('hidden');
                 return;
             }
 
+            let targetEmployees = [];
+            if (currentAct.participants === 'ALL') {
+                targetEmployees = [...employees];
+            } else if (Array.isArray(currentAct.participants)) {
+                targetEmployees = employees.filter(emp => currentAct.participants.includes(emp.id));
+            }
+
+            if (targetEmployees.length === 0) {
+                listContainer.innerHTML = '<div class="col-span-1 sm:col-span-2 text-center text-sm text-gray-500 py-6">ไม่มีรายชื่อพนักงานในกิจกรรมนี้</div>';
+                countBadge.textContent = '0/0 ทำแล้ว';
+                if (banner) banner.classList.add('hidden');
+                return;
+            }
+
+            let doneCount = 0;
+            const sorted = targetEmployees.sort((a, b) => a.name.localeCompare(b.name));
+
             sorted.forEach(emp => {
-                const isDone = checkIns.some(c => c.empId === emp.id);
+                const isDone = checkIns.some(c => c.empId === emp.id && c.activityId === actId);
                 if (isDone) doneCount++;
 
                 const item = document.createElement('div');
-                item.className = `flex items-center justify-between p-2.5 rounded-lg border text-sm transition-all ${
-                    isDone ? 'bg-emerald-50/70 border-emerald-200' : 'bg-gray-50 border-gray-200'
+                item.className = `flex items-center justify-between p-3 rounded-lg border text-sm transition-all shadow-sm ${
+                    isDone ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'
                 }`;
-
                 item.innerHTML = `
                     <div class="flex flex-col min-w-0 pr-2">
-                        <span class="font-medium ${isDone ? 'text-emerald-900' : 'text-gray-700'} truncate">${emp.name}</span>
-                        <span class="text-[11px] ${isDone ? 'text-emerald-600' : 'text-gray-400'}">${emp.dept}</span>
+                        <span class="font-medium ${isDone ? 'text-emerald-900' : 'text-rose-900'} truncate">${emp.name}</span>
+                        <span class="text-[11px] ${isDone ? 'text-emerald-600' : 'text-rose-500'}">${emp.dept}</span>
                     </div>
                     <div>
                         ${isDone 
-                            ? `<span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1 text-[10px]"></i>ทำแล้ว</span>`
-                            : `<span class="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full"><i class="fa-regular fa-clock mr-1 text-[10px]"></i>ยังไม่ได้ทำ</span>`
+                            ? `<span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-check-circle mr-1"></i>ทำแล้ว</span>`
+                            : `<span class="inline-flex items-center text-xs font-semibold text-rose-700 bg-rose-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-circle-xmark mr-1"></i>ยังไม่ทำ</span>`
                         }
                     </div>
                 `;
                 listContainer.appendChild(item);
             });
+            countBadge.textContent = `${doneCount}/${targetEmployees.length} ทำแล้ว`;
 
-            if (countBadge) {
-                countBadge.textContent = `${doneCount}/${employees.length} ทำแล้ว`;
+            // Display completion banner if all target employees have completed
+            if (banner) {
+                if (doneCount > 0 && doneCount === targetEmployees.length) {
+                    banner.classList.remove('hidden');
+                } else {
+                    banner.classList.add('hidden');
+                }
             }
         }
 
-        // --- REPORTING ---
         function renderReport() {
             const tbody = document.getElementById('report-table-body');
+            const actFilter = document.getElementById('report-activity-select').value;
             tbody.innerHTML = '';
+            
+            let totalTarget = 0, doneCount = 0;
 
-            let doneCount = 0;
-            const sortedEmp = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+            if (actFilter === 'all') {
+                document.getElementById('stat-total').textContent = '-';
+                document.getElementById('stat-done').textContent = checkIns.length;
+                document.getElementById('stat-pending').textContent = '-';
 
-            sortedEmp.forEach(emp => {
-                const record = checkIns.find(c => c.empId === emp.id);
-                const tr = document.createElement('tr');
+                const sortedChecks = [...checkIns].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                sortedChecks.forEach(rec => {
+                    const emp = employees.find(e => e.id === rec.empId) || {name: 'Unknown', dept: '-'};
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">${emp.name}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-500">${emp.dept}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-indigo-600 hidden md:table-cell text-xs">${rec.topic}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fa-solid fa-check mt-1 mr-1"></i> Done</span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <button onclick="toggleCheckInByAdmin('${rec.empId}', '${rec.activityId}', true)" class="text-xs bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded hover:bg-red-200 transition-colors">
+                                <i class="fa-solid fa-xmark mr-1"></i> ยกเลิก
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                const currentAct = activities.find(a => a.id === actFilter);
                 
-                let statusHtml, timeHtml;
-                
-                if (record) {
-                    doneCount++;
-                    statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fa-solid fa-check mr-1 mt-[2px]"></i> Done</span>`;
-                    const dt = new Date(record.timestamp);
-                    timeHtml = `${dt.toLocaleDateString('th-TH')} <span class="text-gray-400 ml-1">${dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span>`;
+                let targetEmployees = [];
+                if (!currentAct || currentAct.participants === 'ALL') {
+                    targetEmployees = [...employees];
+                } else if (Array.isArray(currentAct.participants)) {
+                    targetEmployees = employees.filter(emp => currentAct.participants.includes(emp.id));
+                }
+
+                totalTarget = targetEmployees.length;
+                const sortedEmp = targetEmployees.sort((a,b) => a.name.localeCompare(b.name));
+                const actName = currentAct ? currentAct.topic : '';
+
+                sortedEmp.forEach(emp => {
+                    const isDone = checkIns.some(c => c.empId === emp.id && c.activityId === actFilter);
+                    if (isDone) doneCount++;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">${emp.name}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-500">${emp.dept}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-500 hidden md:table-cell text-xs">${actName}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            ${isDone 
+                                ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fa-solid fa-check mt-1 mr-1"></i> Done</span>`
+                                : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fa-solid fa-clock mt-1 mr-1"></i> Pending</span>`
+                            }
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            ${isDone 
+                                ? `<button onclick="toggleCheckInByAdmin('${emp.id}', '${actFilter}', true)" class="text-xs bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded hover:bg-red-200 transition-colors"><i class="fa-solid fa-xmark mr-1"></i> ยกเลิก</button>`
+                                : `<button onclick="toggleCheckInByAdmin('${emp.id}', '${actFilter}', false)" class="text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded hover:bg-emerald-200 transition-colors"><i class="fa-solid fa-check mr-1"></i> เช็คชื่อให้</button>`
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('stat-total').textContent = totalTarget;
+                document.getElementById('stat-done').textContent = doneCount;
+                document.getElementById('stat-pending').textContent = totalTarget - doneCount;
+            }
+            
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`;
+            }
+        }
+
+        async function toggleCheckInByAdmin(empId, actId, isDone) {
+            const empData = employees.find(e => e.id === empId);
+            const actData = activities.find(a => a.id === actId);
+
+            if (isDone) {
+                checkIns = checkIns.filter(c => !(c.empId === empId && c.activityId === actId));
+                updateAllViews();
+                showToast('ยกเลิกการเช็คชื่อเรียบร้อยแล้ว', 'success');
+                await sendToCloud({ action: 'deleteCheckIn', empId: empId, activityId: actId });
+            } else {
+                checkIns.push({
+                    empId: empId,
+                    topic: actData ? actData.topic : '',
+                    activityId: actId,
+                    timestamp: new Date().toISOString()
+                });
+                updateAllViews();
+                showToast('เช็คชื่อสำเร็จแล้ว!', 'success');
+                await sendToCloud({
+                    action: 'checkIn',
+                    empId: empData ? empData.id : empId,
+                    name: empData ? empData.name : 'Unknown',
+                    dept: empData ? empData.dept : '-',
+                    topic: actData ? actData.topic : '',
+                    activityId: actId
+                });
+            }
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('view-checkin').classList.toggle('hidden', tabId !== 'checkin');
+            document.getElementById('view-admin').classList.toggle('hidden', tabId !== 'admin');
+            document.getElementById('tab-btn-checkin').className = tabId === 'checkin' ? 'px-6 py-3 text-sm transition-colors tab-active' : 'px-6 py-3 text-sm transition-colors tab-inactive';
+            document.getElementById('tab-btn-admin').className = tabId === 'admin' ? 'px-6 py-3 text-sm transition-colors tab-active' : 'px-6 py-3 text-sm transition-colors tab-inactive';
+            
+            if (tabId === 'admin') {
+                if (isAdminAuthenticated) {
+                    document.getElementById('admin-login-view').classList.add('hidden');
+                    document.getElementById('admin-content-view').classList.remove('hidden');
                 } else {
-                    statusHtml = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
-                    timeHtml = `<span class="text-gray-400">-</span>`;
+                    document.getElementById('admin-login-view').classList.remove('hidden');
+                    document.getElementById('admin-content-view').classList.add('hidden');
+                    document.getElementById('admin-password-input').focus();
                 }
-
-                tr.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">${emp.name}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-500">${emp.dept}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-center">${statusHtml}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-right text-gray-600">${timeHtml}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Update summary stats
-            document.getElementById('stat-total').textContent = employees.length;
-            document.getElementById('stat-done').textContent = doneCount;
-            document.getElementById('stat-pending').textContent = employees.length - doneCount;
+            }
         }
 
-        // --- EXPORT TO CSV ---
-        function exportToCSV() {
-            // \uFEFF is the Byte Order Mark (BOM) needed for Excel to read UTF-8 Thai chars properly
-            let csv = '\uFEFF'; 
-            csv += 'Employee Name,Department,Status,Date,Time\n';
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('admin-password-input').value === adminPassword) {
+                isAdminAuthenticated = true;
+                showToast('เข้าสู่ระบบผู้ดูแลสำเร็จ', 'success');
+                switchTab('admin');
+            } else {
+                showToast('รหัสผ่านไม่ถูกต้อง', 'error');
+                document.getElementById('admin-password-input').value = '';
+            }
+        }
 
-            const sortedEmp = [...employees].sort((a,b) => a.name.localeCompare(b.name));
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            document.getElementById('admin-password-input').value = '';
+            showToast('ล็อกหน้าจอแล้ว', 'success');
+            switchTab('admin');
+        }
 
-            sortedEmp.forEach(emp => {
-                const record = checkIns.find(c => c.empId === emp.id);
-                let status = 'Pending';
-                let dateStr = '-';
-                let timeStr = '-';
+        async function addEmployee(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-emp-name').value.trim();
+            const dept = document.getElementById('new-emp-dept').value.trim();
+            const id = 'emp_' + Date.now();
+            if (name && dept) {
+                employees.push({ id, name, dept });
+                document.getElementById('new-emp-name').value = ''; 
+                document.getElementById('new-emp-dept').value = '';
+                updateAllViews();
+                await sendToCloud({ action: 'addEmployee', id, name, dept });
+                showToast('เพิ่มพนักงานสำเร็จ', 'success');
+            }
+        }
 
-                if (record) {
-                    status = 'Done';
-                    const dt = new Date(record.timestamp);
-                    dateStr = dt.toLocaleDateString('th-TH');
-                    timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
-                }
+        let empToDelete = null;
+        function openDeleteModal(id) {
+            empToDelete = id;
+            document.getElementById('delete-modal-title').textContent = 'ลบพนักงาน';
+            document.getElementById('delete-modal-msg').textContent = 'คุณแน่ใจหรือไม่ที่จะลบพนักงานคนนี้?';
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('btn-confirm-delete').onclick = async () => {
+                document.getElementById('delete-modal').classList.add('hidden');
+                employees = employees.filter(e => e.id !== empToDelete);
+                updateAllViews();
+                await sendToCloud({ action: 'deleteEmployee', id: empToDelete });
+                showToast('ลบพนักงานสำเร็จ', 'success');
+            };
+        }
+
+        function openDeleteActivityModal() {
+            const actId = document.getElementById('setting-act-id').value;
+            if (!actId || actId === 'new') return;
+            const act = activities.find(a => a.id === actId);
+            if (!act) return;
+
+            document.getElementById('delete-modal-title').textContent = 'ลบกิจกรรม';
+            document.getElementById('delete-modal-msg').textContent = `คุณแน่ใจหรือไม่ที่จะลบกิจกรรม "${act.topic}" รวมถึงประวัติการเช็คชื่อทั้งหมดในกิจกรรมนี้?`;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('btn-confirm-delete').onclick = async () => {
+                document.getElementById('delete-modal').classList.add('hidden');
                 
-                // Wrap in quotes to handle commas in names/depts if any
-                csv += `"${emp.name}","${emp.dept}","${status}","${dateStr}","${timeStr}"\n`;
+                // ลบกิจกรรมออกจากรายการ
+                activities = activities.filter(a => a.id !== actId);
+                // ลบประวัติการเช็คชื่อทั้งหมดที่ผูกกับกิจกรรมนี้
+                checkIns = checkIns.filter(c => c.activityId !== actId);
+
+                updateAllViews();
+                document.getElementById('admin-activity-select').value = 'new';
+                changeAdminActivity();
+                
+                await sendToCloud({ action: 'deleteActivity', id: actId });
+                showToast('ลบกิจกรรมและประวัติการเช็คชื่อสำเร็จ', 'success');
+            };
+        }
+
+        function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+
+        function renderEmployeeListAdmin() {
+            const list = document.getElementById('employee-list');
+            document.getElementById('emp-count-badge').textContent = employees.length;
+            list.innerHTML = '';
+            [...employees].sort((a,b) => a.name.localeCompare(b.name)).forEach(emp => {
+                list.innerHTML += `
+                    <div class="flex justify-between items-center p-3 hover:bg-gray-50">
+                        <div class="flex flex-col"><span class="text-sm font-medium">${emp.name}</span><span class="text-xs text-gray-500">${emp.dept}</span></div>
+                        <button onclick="openDeleteModal('${emp.id}')" class="text-gray-400 hover:text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
             });
+        }
 
-            // Create download link
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
+        function exportToCSV() {
+            let csv = '\uFEFFชื่อพนักงาน,แผนก,หัวข้อกิจกรรม,สถานะ,วันเวลาที่เช็คชื่อ\n';
+            const actFilter = document.getElementById('report-activity-select').value;
+            
+            const formatDateTime = (ts) => {
+                if (!ts) return '-';
+                const d = new Date(ts);
+                return isNaN(d) ? ts : d.toLocaleString('th-TH');
+            };
+
+            if (actFilter === 'all') {
+                checkIns.forEach(c => {
+                    const emp = employees.find(e => e.id === c.empId) || {name: '-', dept: '-'};
+                    const timeStr = formatDateTime(c.timestamp);
+                    csv += `"${emp.name}","${emp.dept}","${c.topic}","Done","${timeStr}"\n`;
+                });
+            } else {
+                const actName = activities.find(a => a.id === actFilter)?.topic || '';
+                employees.forEach(emp => {
+                    const check = checkIns.find(c => c.empId === emp.id && c.activityId === actFilter);
+                    const isDone = !!check;
+                    const timeStr = isDone ? formatDateTime(check.timestamp) : '-';
+                    csv += `"${emp.name}","${emp.dept}","${actName}","${isDone ? 'Done' : 'Pending'}","${timeStr}"\n`;
+                });
+            }
+            
             const link = document.createElement("a");
-            link.setAttribute("href", url);
-            
-            // Clean filename
-            const cleanTopic = (appSettings.topic || 'Report').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            link.setAttribute("download", `CheckIn_${cleanTopic}.csv`);
-            
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = `Report_${Date.now()}.csv`;
             link.click();
-            document.body.removeChild(link);
-            
-            showToast('Report downloaded as CSV', 'success');
         }
 
-        // --- CLEAR DATA UTILITY ---
-        function clearCheckInData() {
-            document.getElementById('clear-modal').classList.remove('hidden');
-        }
-        function closeClearModal() {
-            document.getElementById('clear-modal').classList.add('hidden');
-        }
-        function executeClearData() {
-            checkIns = [];
-            persistData();
-            renderReport();
-            closeClearModal();
-            showToast('All check-in records have been reset', 'success');
-        }
-
-        // --- TOAST NOTIFICATION SYSTEM ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
-            let colorClasses = type === 'success' 
-                ? 'bg-green-600 text-white border-green-700' 
-                : 'bg-red-600 text-white border-red-700';
-            
-            let icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
-
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded shadow-lg border-l-4 toast-enter ${colorClasses}`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icon}"></i>
-                <span class="text-sm font-medium">${message}</span>
-            `;
-            
+            const colors = type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded shadow-lg border-l-4 toast-enter ${colors}`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="text-sm font-medium">${message}</span>`;
             container.appendChild(toast);
-
-            // Animate out and remove
             setTimeout(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-exit');
-                setTimeout(() => {
-                    if (container.contains(toast)) {
-                        container.removeChild(toast);
-                    }
-                }, 300);
+                toast.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
     </script>
