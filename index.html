@@ -315,7 +315,8 @@
 
     <script>
         // --- DATA & STATE MANAGEMENT ---
-        
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBVpQKQgyUbHAMKe33n6fQrfD4ft1je_YaDIjhudD_b21Kb_flzuP00BjCD02b8zKV/exec';
+
         // Default Sample Data
         const defaultEmployees = [
             { id: 'emp_1', name: 'Somchai Jaidee', dept: 'IT' },
@@ -336,6 +337,48 @@
         let employees = JSON.parse(localStorage.getItem('chktrk_employees')) || defaultEmployees;
         let checkIns = JSON.parse(localStorage.getItem('chktrk_data')) || [];
 
+        // Helper for sending data to Google Apps Script
+        async function sendToCloud(payload) {
+            if (!SCRIPT_URL) return;
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error('Cloud Sync Error:', err);
+            }
+        }
+
+        // Helper for fetching real-time data from Google Sheet
+        async function fetchCloudData() {
+            if (!SCRIPT_URL) return;
+            try {
+                const res = await fetch(SCRIPT_URL);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.employees && Array.isArray(data.employees) && data.employees.length > 0) {
+                    employees = data.employees;
+                }
+                if (data.checkIns && Array.isArray(data.checkIns)) {
+                    checkIns = data.checkIns;
+                }
+                if (data.settings && data.settings.topic) {
+                    appSettings = data.settings;
+                }
+                persistData();
+                updateCheckInHeaders();
+                renderDropdown();
+                renderEmployeeListAdmin();
+                renderReport();
+                renderUserStatusList();
+            } catch (err) {
+                console.warn('Using local data fallback:', err);
+            }
+        }
+
         // Save data back to localStorage
         function persistData() {
             localStorage.setItem('chktrk_settings', JSON.stringify(appSettings));
@@ -344,7 +387,7 @@
         }
 
         // --- INITIALIZATION ---
-        window.onload = () => {
+        window.onload = async () => {
             // Apply settings to Admin form
             document.getElementById('setting-topic').value = appSettings.topic;
             document.getElementById('setting-start').value = appSettings.startDate;
@@ -356,6 +399,9 @@
             renderEmployeeListAdmin();
             renderReport();
             renderUserStatusList();
+
+            // Fetch latest data from Google Sheet
+            await fetchCloudData();
         };
 
         // --- TAB SWITCHING LOGIC ---
@@ -431,8 +477,17 @@
             appSettings.endDate = document.getElementById('setting-end').value;
             
             persistData();
+
+            // Send to Google Sheet
+            sendToCloud({
+                action: 'saveSettings',
+                topic: appSettings.topic,
+                startDate: appSettings.startDate,
+                endDate: appSettings.endDate
+            });
+
             updateCheckInHeaders();
-            showToast('Settings saved successfully', 'success');
+            showToast('Settings saved to Cloud & Local', 'success');
         }
 
         // --- ADMIN: EMPLOYEE MANAGEMENT ---
@@ -451,14 +506,23 @@
                 employees.push(newEmp);
                 persistData();
                 
+                // Send to Google Sheet
+                sendToCloud({
+                    action: 'addEmployee',
+                    id: newEmp.id,
+                    name: newEmp.name,
+                    dept: newEmp.dept
+                });
+
                 // Update UI
                 nameInput.value = '';
                 deptInput.value = '';
                 renderEmployeeListAdmin();
-                renderDropdown(); // Update background dropdown
-                renderReport(); // Update table stats
+                renderDropdown();
+                renderReport();
+                renderUserStatusList();
                 
-                showToast('Employee added', 'success');
+                showToast('Employee added to Cloud', 'success');
             }
         }
 
@@ -484,18 +548,24 @@
         function executeDelete() {
             if (!employeeToDeleteId) return;
             
-            // Remove from employee list
+            // Send delete action to Google Sheet
+            sendToCloud({
+                action: 'deleteEmployee',
+                id: employeeToDeleteId
+            });
+
+            // Remove from local employee list
             employees = employees.filter(emp => emp.id !== employeeToDeleteId);
-            // Optionally remove their check-in data to keep things clean
             checkIns = checkIns.filter(chk => chk.empId !== employeeToDeleteId);
             
             persistData();
             renderEmployeeListAdmin();
             renderDropdown();
             renderReport();
+            renderUserStatusList();
             
             closeDeleteModal();
-            showToast('Employee deleted', 'success');
+            showToast('Employee deleted from Cloud', 'success');
         }
 
         function renderEmployeeListAdmin() {
@@ -573,41 +643,28 @@
             }
 
             const empData = employees.find(emp => emp.id === empId);
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYymG1RdDEKVn1XTOh_hj5unygYcpjHPXhpTkDjUFOjZE3ajTL4ekS4PN6HhxipKth/exec';
-
             showToast('Saving to Google Sheet...', 'success');
 
-            try {
-                // Send data to Google Apps Script
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        empId: empData ? empData.id : empId,
-                        name: empData ? empData.name : '',
-                        dept: empData ? empData.dept : '',
-                        topic: appSettings.topic || ''
-                    })
-                });
+            // Send Check-In action to Google Sheet
+            await sendToCloud({
+                action: 'checkIn',
+                empId: empData ? empData.id : empId,
+                name: empData ? empData.name : '',
+                dept: empData ? empData.dept : '',
+                topic: appSettings.topic || ''
+            });
 
-                // Record check-in locally
-                checkIns.push({
-                    empId: empId,
-                    timestamp: new Date().toISOString()
-                });
+            // Record check-in locally
+            checkIns.push({
+                empId: empId,
+                timestamp: new Date().toISOString()
+            });
 
-                persistData();
-                renderReport();
-                renderUserStatusList();
-                document.getElementById('emp-select').value = ''; // Reset select
-                showToast('Checked in & Saved to Google Sheet!', 'success');
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error saving to Google Sheet', 'error');
-            }
+            persistData();
+            renderReport();
+            renderUserStatusList();
+            document.getElementById('emp-select').value = '';
+            showToast('Checked in & Saved to Google Sheet!', 'success');
         }
 
         // --- USER STATUS LIST DISPLAY ---
